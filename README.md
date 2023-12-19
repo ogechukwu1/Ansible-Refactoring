@@ -317,7 +317,7 @@ Update __site.yml__ with `- import_playbook: ..static-assignments/common-del.yml
 
 
 
-To push the codes to github and merge to the main branch
+To push the codes to github and merge to the main branch.
 
 We run the command
 
