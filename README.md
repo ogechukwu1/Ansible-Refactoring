@@ -65,7 +65,7 @@ On Available tab search for `copy artifacts` and install the plugin without rest
 ![](./images/3.png)
 
 
-Then create a new free style projects and name it `save_artifacts`
+Then create a new free style projects and name it `save_artifacts`.
 
 ![](./images/4.png)
 
