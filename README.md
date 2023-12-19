@@ -350,7 +350,7 @@ We then go to the github and create a pull request
 
 Problem encountered.
 
-I gave full permission to /home/ubuntu but the build wasn't successful so i removed full permission and gave it 755 and it was successful. I also gave jenkins the ownership of the destination directory
+I gave full permission to /home/ubuntu but the build wasn't successful so i removed full permission and gave it 755 and it was successful. I also gave jenkins the ownership of the destination directory.
 
 `sudo chmod -R 755 /home/ubuntu`
 
