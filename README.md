@@ -10,7 +10,7 @@ Refactoring in Ansible involves restructuring and rewriting your Ansible code to
 
 We will refactor our Ansible code, create assignments and earn how to use imports functionality. 
 
-Imports allows you to effectively re-use previously created playbooks in a new playbook and it allows you to organize your tasks and re-use them when needed.
+__Imports__ allows you to effectively re-use previously created playbooks in a new playbook and it allows you to organize your tasks and re-use them when needed.
 
 
 For better understanding of Ansible artifacts re-use, [read this](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse.html)
@@ -33,7 +33,7 @@ __Code refactoring:__ Refactoring code is the process of restructuring or modify
 ## Refactor Ansible code by importing other playbooks into site.yml
 
 
-__step 1:__ JENKINS JOB ENHANCEMENT
+__step 1: JENKINS JOB ENHANCEMENT__
 
 - Let us make some changes to our previous jenkins job.
 
@@ -65,7 +65,7 @@ On Available tab search for `copy artifacts` and install the plugin without rest
 ![](./images/3.png)
 
 
-Then create a new free style projects and name it `save_artifacts`.
+Then create a new free style projects and name it `save_artifacts`
 
 ![](./images/4.png)
 
@@ -91,7 +91,7 @@ Then we update the source code management section.
 
 
 
-The main idea of __save_artifacts__ project is to save artifacts into __/home/ubuntu/ansible-config-artifact__ directory. To achieve this, we will create a __Build step__ and choose __Copy artifacts__ from our previous my-job project. We will specify my-job as a source project and __/home/ubuntu/ansible-config-artifact__ as a target directory.
+The main idea of __save_artifacts__ project is to save artifacts into __/home/ubuntu/ansible-config-artifact__ directory. To achieve this, we will create a __Build step__ and choose __Copy artifacts__ from our previous `my-job` project. We will specify my-job as a source project and __/home/ubuntu/ansible-config-artifact__ as a target directory.
 
 
 
@@ -192,13 +192,13 @@ __REFACTOR ANSIBLE CODE BY IMPORTING OTHER PLAYBOOKS INTO SITE.YML__
 
 
 
-Before starting to refactor the code, We pull down the latest code from main branch and creat a new branch refactor.
+Before starting to refactor the code, We pull down the latest code from main branch and create a new branch __"refactor"__.
 
 
 ![](./images/15.png)
 
 
-Refactoring is one of the techniques that can be used for constant iterative improvement for better efficiency in DevOps.
+__Refactoring__ is one of the techniques that can be used for constant iterative improvement for better efficiency in DevOps.
 
 
 
@@ -239,7 +239,9 @@ Inside __playbooks/site.yml__ file, import __common.yml playbook__.
 ```
 ---
 - hosts: all
-- import_playbook: ../static-assignments/common.yml
+- task:
+    - name: include common playbook
+    - import_playbook: ../static-assignment/common.yml
 ```
 
 ![](./images/19.png)
@@ -273,6 +275,7 @@ In the static-assignment/common-del.yml we paste the code below
   remote_user: ec2-user
   become: yes
   become_user: root
+  become_method: sudo
   tasks:
   - name: delete wireshark
     yum:
@@ -308,7 +311,7 @@ Update __site.yml__ with `- import_playbook: ..static-assignments/common-del.yml
 ```
 ---
 - hosts: all
-- import_playbook: ../static-assignments/common-del.yml
+- import_playbook: ../static-assignment/common-del.yml
 ```
 
 
@@ -317,7 +320,7 @@ Update __site.yml__ with `- import_playbook: ..static-assignments/common-del.yml
 
 
 
-To push the codes to github and merge to the main branch.
+To push the codes to github and merge to the main branch
 
 We run the command
 
@@ -346,11 +349,15 @@ We then go to the github and create a pull request
 ![](./images/27.png)
 
 
+When the code is merged to the main branch we will see the jenkins build.
+
+
+![](./images/30.png)
 
 
 Problem encountered.
 
-I gave full permission to /home/ubuntu but the build wasn't successful so i removed full permission and gave it 755 and it was successful. I also gave jenkins the ownership of the destination directory.
+I gave full permission to /home/ubuntu but the build wasn't successful so i removed full permission and gave it 755 and it was successful. I also gave jenkins the ownership of the destination directory
 
 `sudo chmod -R 755 /home/ubuntu`
 
@@ -363,6 +370,354 @@ I gave full permission to /home/ubuntu but the build wasn't successful so i remo
 Resolution
 
 ![](./images/28.png)
+
+
+
+
+
+The artifact is saved in the __ansible-config-artifact__ directory in the jenkins server.
+
+Then run the playbook
+
+`ansible-playbook -i inventory/dev.ini playbooks/site.yml`
+
+![](./images/31.png)
+
+![](./images/32.png)
+
+
+
+To check that wireshark is deleted on all the servers, we run the comand
+
+`wireshark --version`
+
+on the various target servers.
+
+![](./images/33.png)
+
+
+
+Now we have a ready solution to install/delete packages on multiple servers with just one command.
+
+__CONFIGURE UAT WEBSERVERS WITH A ROLE ‘WEBSERVER’__
+
+
+We will be configuring two new Web Servers as UAT. We could write tasks to configure Web Servers in the same playbook, but it would be too messy, instead, we will use a dedicated role to make our configuration reusable.
+
+
+
+Let us Launch two EC2 instances using RHEL 8 image, we will use them as our UAT servers so give them names- __Web1-uat and Web2-uat__.
+
+![](./images/55.png)
+
+![](./images/56.png)
+
+
+![](./images/57.png)
+
+
+![](./images/58.png)
+
+
+
+
+
+__Note__: And don't forget to stop other instances that you are not using to avoid extra cost. For now you only need 2 RHEL 8 servers as webservers and 1 existing `jenkins-Ansible` server up and running.
+
+![](./images/34.png)
+
+
+To create a role you must create a directory called `roles`in the __ansible-config-mgt__.
+
+
+![](./images/35.png)
+
+
+
+We will install [windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/install). So we are able to access the windows files in the linux environment.
+
+![](./images/36.png)
+
+Open window powershell and run as administrator
+
+run
+
+`wsl --install`
+
+then on the WSL ubuntu environment run the command to connect to vscode.
+
+`code .`
+
+
+Let,s update and install ansible in __ansible-config-mgt__.
+
+
+`sudo apt update -y && sudo apt install ansible -y`
+
+
+Then in the `roles` directory create the webserver role.
+
+
+`cd roles`
+
+`ansible-galaxy init webserver`
+
+![](./images/37.png)
+
+Then we install tree
+
+`sudo apt install tree -y`
+
+
+![](./images/38.png)
+
+
+Create the directory/files structure manually.
+
+`tree webserver`
+
+![](./images/39.png)
+
+
+Update your inventory `ansible-config-mgt/inventory/uat.ini` file with private IP addresses of your UAT Webserver
+
+
+![](./images/40.png)
+
+
+__NOTE:__ Ensure you are using ssh-agent to ssh into jenkins-Ansible instance.
+
+
+
+In your jenkins server go to __`/etc/ansible/ansible.cfg`__ file uncomment __`roles_path`__ and provide a full path to your roles directory __`roles_path = /home/ubuntu/ansible-config-artifact/roles`__. So Ansible will know where to find configured roles.
+
+
+Edit the roles path
+
+`sudo vi /etc/ansible/ansible.cfg`
+
+Then search for __roles_path__
+
+![](./images/41.png)
+
+
+
+Then Update the jenkins-Ansible server __/etc/hosts__ directory with the UAT webservers.
+
+`sudo vi /etc/hosts/`
+
+
+![](./images/42.png)
+
+
+Test the connectivity
+
+![](./images/43.png)
+
+
+Then go to `/etc/ansible/ansible.cfg` and update
+
+
+![](./images/44.png)
+
+
+
+
+
+Let's add some logic to the webserver role. Go into __tasks__ directory and within the __main.yml__ file, write configuration tasks to do the following
+
+
+- Install and configure Apache (httpd service)
+
+- Clone Tooling website from GitHub https://github.com/ogechukwu1/tooling
+
+- Ensure the tooling website code is deployed to /var/www/html on each of 2 UAT Web servers.
+
+- Make sure httpd service is started.
+
+
+
+
+```
+---
+- name: install apache
+  become: true
+  ansible.builtin.yum:
+    name: "httpd"
+    state: present
+
+- name: install git
+  become: true
+  ansible.builtin.yum:
+    name: "git"
+    state: present
+
+- name: clone a repo
+  become: true
+  ansible.builtin.git:
+    repo: https://github.com/ogechukwu1/tooling.git
+    dest: /var/www/html
+    force: yes
+
+- name: copy html content to one level up
+  become: true
+  command: cp -r /var/www/html/html/ /var/www/
+
+- name: Start service httpd, if not started
+  become: true
+  ansible.builtin.service:
+    name: httpd
+    state: started
+
+- name: recursively remove /var/www/html/html/ directory
+  become: true
+  ansible.builtin.file:
+    path: /var/www/html/html
+    state: absent
+```
+
+
+![](./images/45.png)
+
+![](./images/46.png)
+
+
+
+
+__REFERENCE WEBSERVER ROLE__
+
+Within the __static-assignment__ directory, create a new assignment for __uat_webservers__ `uat_webservers.yml`. This is where we will reference the role.
+
+
+![](./images/47.png)
+
+Then Update the `uat_webservers.yml`` file
+
+```
+---
+- hosts: uat_webservers
+  roles:
+     - webserver
+```
+
+
+![](./images/48.png)
+
+
+
+Remember that the entry point to our ansible configuration is the `site.yml` file. Refer your `uat_webservers.yml` role inside `site.yml`.
+
+So, we should have these commands in `site.yml`
+
+
+```
+---
+- hosts: all
+- import_playbook: ../static-assignment/common-del.yml
+
+- hosts: all
+- import_playbook: ../static-assignment/uat_webservers.yml
+```
+
+
+![](./images/49.png)
+
+
+__COMMIT AND TEST__
+
+Commit the changes, create a Pull Request and merge them to main branch, make sure webhook triggered two consequent Jenkins jobs, they ran successfully and copied all the files to your __Jenkins-Ansible server__ into __/home/ubuntu/ansible-config-mgt/__ directory.
+
+Push to the github repository feature/refactor branch
+
+
+Then the jenkins builds automatically.
+
+![](./images/50.png)
+
+
+Then it saves the artifact in the ansible-config-artifact Jenkins server.
+
+
+![](./images/51.png)
+
+
+Let's run the playbook
+
+`ansible-playbook -i inventory/uat.ini playbooks/site.yml`
+
+
+![](./images/52.png)
+
+![](./images/53.png)
+
+
+
+You should be able to see both of the UAT Webservers configured and can reach them from the browser and ensure that they allow incoming traffic on port 80.
+
+http://(Web1-UAT-Server-Public-IP-or-Public-DNS-Name)/index.php
+
+http://13.56.253.3/index.php
+
+
+![](./images/54.png)
+
+
+
+Your Ansible architecture now looks like this:
+
+
+
+![](./images/59.png)
+
+
+
+
+
+We have successfully deployed and configured UAT web servers using Ansible imports and roles.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
