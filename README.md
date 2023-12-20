@@ -255,7 +255,7 @@ Run ansible-playbook command against the dev environment
 
 
 
-since you need to apply some tasks to your `dev` servers and `wireshark` is already installed . We will go ahead and create another playbook under `static-assignments` and name it `common-del.yml`. In this playbook, configure deletion of wireshark utility. 
+since you need to apply some tasks to your `dev` servers and `wireshark` is already installed . We will go ahead and create another playbook under `static-assignment` and name it `common-del.yml`. In this playbook, configure deletion of wireshark utility. 
 
 
 
@@ -515,7 +515,7 @@ Test the connectivity
 ![](./images/43.png)
 
 
-Then go to `/etc/ansible/ansible.cfg` and update
+Then go to `/etc/ansible/ansible.cfg` and update. uncomment the `become`.
 
 
 ![](./images/44.png)
@@ -568,7 +568,7 @@ Let's add some logic to the webserver role. Go into __tasks__ directory and with
   ansible.builtin.service:
     name: httpd
     state: started
-
+ 
 - name: recursively remove /var/www/html/html/ directory
   become: true
   ansible.builtin.file:
